@@ -1,1 +1,854 @@
+// This source code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © TradingView
 
+//@version=5
+indicator("Financials on Chart", "", true)
+ 
+// Financials on Chart
+// v5, 2023.05.27
+
+// This code was written using the recommendations from the Pine Script™ User Manual's Style Guide:
+//   https://www.tradingview.com/pine-script-docs/en/v5/writing/Style_guide.html
+
+
+
+//#region ———————————————————— Constants 
+
+
+// Default values for display.
+color  LINK_WATER = #D1D4DC
+color  BG_COL     = #1848CC
+color  BG_DN      = #C90707
+
+string TS1  = "tiny"      
+string TS2  = "small"     
+string TS3  = "normal"    
+string TS4  = "large"     
+string TS5  = "huge"      
+string TS6  = "auto"   
+string LG   = " Legend"
+
+// Financial periods.
+string FQ   = "Financial Quarter"
+string FY   = "Financial Year"
+string TT   = "Trailing Twelve Months"
+
+// Financial legends.
+string F_NA = "⸺"
+string F000 = "█ GELİR TABLOLARI █"
+string F001 = " Vergi sonrası diğer gelir/gider"
+string F002 = " Ortalama Temel Hisse Senedi Sayısı"
+string F003 = " Diğer Mal ve Hizmet Satış Maliyeti"
+string F004 = " Mal ve Hizmet Satış Maliyeti"
+string F005 = " Amortismanlar"
+string F006 = " Diluted net income available to common stockholders"
+string F007 = " Seyreltilmiş Hisse Senedi Sayısı"
+string F008 = " Seyrelme Düzeltmesi"
+string F009 = " Durdurulan Faaliyetler"
+string F010 = " Hisse Başına Kazanç - Basit"
+string F011 = " Hisse Başına Kazanç - Seyreltmiş"
+string F012 = " FVÖK"
+string F013 = " FAVÖK"
+string F014 = " Kazançlardaki Özkaynaklar"
+string F015 = " Brüt Kar"
+string F016 = " Vergiler"
+string F017 = " Sermayeye Eklenen Faiz"
+string F018 = " Borçlardaki Faiz Gideri"
+string F019 = " Kontrol Gücü Olmayan / Azınlık Payları"
+string F020 = " Devam Eden Operasyonlar Öncesi Net Gelir"
+string F021 = " Net Gelir"
+string F022 = " Faiz Harici Faaliyet Dışı Gelir"
+string F023 = " Faiz Gideri, Faiz Sermayesi Düşüldükten Sonra"
+string F024 = " Faaliyet Dışı Faiz Geliri"
+string F025 = " Faaliyet Geliri"
+string F026 = " Faaliyet Gideri (Mal ve Hizmet Satış Maliyeti Harici)"
+string F027 = " Çeşitli İşletme Dışı Giderler"
+string F028 = " Diğer Faaliyet Giderleri"
+string F029 = " Rüçhanlı Hisse Senedine Verilen Temettü"
+string F030 = " Vergi Öncesi Kazançlardaki Pay"
+string F031 = " Vergiden Önceki Kar "
+string F032 = " Araştırma ve Geliştirme"
+string F033 = " Satış/Genel/İdari Giderler, Diğer"
+string F034 = " Satış/Genel/İdari Giderler, Total"
+string F035 = " Faaliyet Dışı Gelirler, Total"
+string F036 = " Total Faaliyet Gideri"
+string F037 = " Total Gelir"
+string F038 = " Olağandışı Gelir/Gider"
+
+string F100 = "█ BİLANÇO █"
+string F101 = " Borçlu Hesaplar"
+string F102 = " Alınacak Hesaplar - Trade, Net"
+string F103 = " Tahakkuk Etmiş Ücretler"
+string F104 = " Birikmiş Amortisman, Total"
+string F105 = " Ek Ödenmiş Sermaye/Sermaye Fazlası "
+string F106 = " Somut - Hisse Başına Defter Değeri"
+string F107 = " Hisse Başına Defter Değeri"
+string F108 = " Aktifleştirilmiş Finansal Kiralama Yükümlülükleri"
+string F109 = " Özkaynak ve İşletme Kiralaması Yükümlülükleri"
+string F110 = " Nakit Benzerleri Geçici Yatırımlar"
+string F111 = " Nadkit ve Kısa Vadeli Yatırımlar"
+string F112 = " Adi Hisse Senedi Sahiplerine Ait Olan Öz Varlık, total"
+string F113 = " Adi Hisse Senedi Nominal/Değerlemesi"
+string F114 = " Uzun Vadeli Borç ve Sermaye Kiralamalarının Cari Dönem Kısmı"
+string F115 = " Ertlenmiş Gelirler, Güncel"
+string F116 = " Ertlenmiş Gelirler, Güncel Olmayan"
+string F117 = " Ertelenmiş Vergi Varlıkları"
+string F118 = " Ertelenmiş Vergi Yükümlülükleri"
+string F119 = " Ödenmesi gereken temettüler"
+string F120 = " İyi Niyet, Net"
+string F121 = " Ödenecek Gelir Vergisi"
+string F122 = " Maddi Olmayan Varlıklar"
+string F123 = " Envanter / Stok - Bitmiş Mamuller"
+string F124 = " Envanter / Stok - Hakediş Ödemesi Alınmış & Diğer"
+string F125 = " Envanter / Stok - Hammaddeler"
+string F126 = " Envanter / Stok - Yapım aşamasında"
+string F127 = " Konsolide Edilmemiş İştiraklere Yapılan Yatırımlar"
+string F128 = " Uzun Vadeli Borçlar, Kira Yükümlülükleri Hariç"
+string F129 = " Uzun Vadeli Borçlar"
+string F130 = " Uzun Vadeli Yatırımlar"
+string F131 = " Uzun Vadeli Tahsil Edilecek Senet / Çek"
+string F132 = " Diğer Uzun Vadeli Varlıklar, Total"
+string F133 = " Azınlık Payı"
+string F134 = " Borç Senetleri"
+string F135 = " İşletme Kira Yükümlülükleri"
+string F136 = " Diğer Maddi Özkaynak"
+string F137 = " Diğer Güncel Varlıklar, Total"
+string F138 = " Diğer Güncel Sorumluluklar"
+string F139 = " Diğer Maddi Olmayan Aktifler, Net"
+string F140 = " Diğer Yatırımlar"
+string F141 = " Diğer Sorumluluklar, Total"
+string F142 = " Diğer Alacaklar"
+string F143 = " Diğer Kısa Dönem Borçları"
+string F144 = " Ödenmiş Sermaye"
+string F145 = " Brüt Mülkiyet/Tesis/Ekipmanlar"
+string F146 = " Net Mülkiyet/Tesis/Ekipmanlar"
+string F147 = " Preferred stock, carrying value - Tercihli hisse senedi, değerlemesi"
+string F148 = " Önceden Ödenmiş Giderler"
+string F149 = " Riskler ve Yükümlülükler için Provizyon"
+string F150 = " Birikmiş / Dağıtılmamış Karlar"
+string F151 = " Kısa Vadeli Borçlar Hariç Uzun Vadeli Borcun Cari Kısmı"
+string F152 = " Kısa Dönemli Borçlar"
+string F153 = " Kısa Dönemli Yatırımlar"
+string F154 = " Özsermaye"
+string F155 = " Aktif Varlıklar Toplamı"
+string F156 = " Dönen Varlıklar Toplamı"
+string F157 = " Toplam Cari Borçlar"
+string F158 = " Toplam Borç"
+string F159 = " Toplam Sermaye"
+string F160 = " Toplam Envanter"
+string F161 = " Pasifler Toplamı"
+string F162 = " Pasifler Toplamı & Özsermaye"
+string F163 = " Toplam Duran Varlıklar"
+string F164 = " Toplam Duran Borçlar"
+string F165 = " Toplam Alacaklar, Net"
+string F166 = " Geri alınmış Hisse Senedi"
+
+string F200 = "█ NAKİT AKIŞI █"
+string F201 = " Amortisman"
+string F202 = " Sabit Varlıklara Yönelik Sermaye Harcamaları"
+string F203 = " Aktifleştirilecek Masraflar / Sermaye Harcamaları"
+string F204 = " Diğer Varlıklara Yönelik Sermaye Harcamaları"
+string F205 = " Finansman Faaliyetlerinden Gelen Nakit"
+string F206 = " Yatırım Faaliyetlerinden Gelen Nakit"
+string F207 = " İşletme Faaliyetlerinden Gelen Nakit"
+string F208 = " Ertelenen Vergi Yükümlülüğü (Nakit Akışı)"
+string F209 = " Amortismanlar (Nakit Akışı)"
+string F210 = " Borç Hesaplarındaki Değişim"
+string F211 = " Alacak Hesaplarındaki Değişim"
+string F212 = " Tahakkuk Eden Giderlerdeki Değişim"
+string F213 = " Envanterlerdeki Değişim" 
+string F214 = " Diğer Varlıklar/Borçlardaki Değişim"
+string F215 = " Ödenmesi Gereken Vergilerdeki Değişim"
+string F216 = " İşletme Sermayesindeki Değişiklikler"
+string F217 = " Ödenen Adi Temettü"
+string F218 = " Amortisman / Tükenme Payı"
+string F219 = " Serbest Nakit Akışı"
+string F220 = " İşletme Faaliyetlerdinden Sağlanan Kaynak"
+string F221 = " Borç İhracı / Faizi, Net"
+string F222 = " Uzun Vadeli Borç İhracı / Faizi"
+string F223 = " Diğer Borçların İhracı / İtfası"
+string F224 = " Kısa Vadeli Borç İhracı / Faizi"
+string F225 = " Hisse Senedi İhracı / İptali, Net"
+string F226 = " Net Gelir (Nakit Akışı)"
+string F227 = " Nakit Dışı Kalemler"
+string F228 = " Diğer Finansal Nakit Akış Kalemleri, Toplam"
+string F229 = " Finansman Faaliyetleri - Diğer Kaynaklar"
+string F230 = " Finansman Faaliyetleri - Diğer kullanımlar"
+string F231 = " Diğer Yatırım Nakit Akış Kalemleri, Toplam"
+string F232 = " Yatırım Faaliyetleri - Diğer Kaynaklar"
+string F233 = " Yatırım Faaliyetleri - Diğer Kullanımlar"
+string F234 = " Ödenen İmtiyazlı Senet Temettüleri"
+string F235 = " İşletme Satın Alma / Devralma"
+string F236 = " Yatırımların Satın Alınması"
+string F237 = " Adi Ve İmtiyazlı Hisse Senetlerinin Geri Alımı"
+string F238 = " İşletme Alım / Satımı, Net"
+string F239 = " Yatırımların Alım / Satımı, Net"
+string F240 = " Uzun Vadeli Borç İndirimi"
+string F241 = " Adi Ve İmtiyazlı Hisse Senedi Satışı"
+string F242 = " Sabir Varlıklar ve İşletme Satışları"
+string F243 = " Yatırımların Satışı / Vadesi"
+string F244 = " Uzun Vadeli Borç İhracı"
+string F245 = " Ödenen Toplam Nakit Temettüler"
+
+string F300 = "█ İSTATİSTİKLER █"
+string F301 = " Tahakkuklar"
+string F302 = " Altman Z-Skoru"
+string F303 = " Aktif Devir Hızı"
+string F304 = " Beneish M-Skoru"
+string F305 = " Geri Alım Getirisi %"    // Geri alım getirisi, bir şirketin kendi hisselerini piyasa değerine geri almak için harcadığı tutarın yüzdesidir.
+string F306 = " Nakit Dönüşüm Döngüsü"
+string F307 = " Nakit / Borç Olanı"
+string F308 = " Malların Maliyetinin Hasılata Oranı"
+string F309 = " Cari Oran"
+string F310 = " Alacakların Ortalama Tahsil Süresi (Gün)"
+string F311 = " Ortalama Stokta Kalma Süresi"
+string F312 = " İbrazdan Kaç Gün Sonra Ödeneceği"
+string F313 = " Borç / Varlıklar Oranı"
+string F314 = " Borç / FAVÖK Oranı"
+string F315 = " Borç / Özsermaye Oranı"
+string F316 = " Borç / Gelir Oranı"
+string F317 = " Temettü Dağıtım Oranı %"
+string F318 = " Temettü Verimi %"
+string F319 = " Hisse Başına Temettü - Dolaşımdaki Senetler İçin"
+string F320 = " Hisse Başı Kar Tahmini"
+string F321 = " Hisse Başına Düşen Kazanç Büyümesi - Bir Yıllık"
+string F322 = " Hisse Başına Düşen Kazanç Büyümesi - Bir Yıllık Seyreltilmiş"
+string F323 = " FAVÖK Marjı %"
+string F324 = " Borç Üzerindeki Etkin Faiz Oranı %"
+string F325 = " İşletme Değerinin FAVÖK'e Oranı"
+string F326 = " İşletme Değeri"
+string F327 = " Özkaynakların Varlıklara Oranı"
+string F328 = " İşletme Değerinin FVÖK'e Oranı"
+string F329 = " İşletme Değerinin Gelire Oranı"
+string F330 = " Dolaşımdaki Hisse Senetleri"
+string F331 = " Serbest Nakit Akışı Marjı %"
+string F332 = " Fulmer H Faktörü"
+string F333 = " Şerefiyenin Varlıklara Oranı"
+string F334 = " Graham'ın Sayısı"
+string F335 = " Brüt Kar Marjı %"
+string F336 = " Brüt Kârın Aktiflere Oranı"
+string F337 = " Faiz Kapsamı"
+string F338 = " Envanterin Gelire Oranı"
+string F339 = " Envanter Stok Yenileme Oranı"
+string F340 = " KZ endeksi"
+string F341 = " Uzun Vadeli Borçların Toplam Varlıklara Oranı"
+string F342 = " Hisse Başına Net Cari Varlık Değeri"
+string F343 = " Çalışan Başına Net Gelir"
+string F344 = " Net Marj %"
+string F345 = " Çalışan Sayısı"
+string F346 = " Faaliyet Kazançları Getirisi %"
+string F347 = " Faaliyet Marjı %"
+string F348 = " Fiyat / Kazanç Oranının Büyümeye Oranı"
+string F349 = " Piotroski F-Skoru"
+string F350 = " İleriye Dönük Fiyat Kazanç Oranı"
+string F351 = " İleriye Dönük Fiyat Satış Oranı"
+string F352 = " Fiyat / Serbest Nakit Akışı Oranı"
+string F353 = " Fiyat / Maddi Duran Varlık Oranı"
+string F354 = " Kalite Oranı" 
+string F355 = " Likidite Oranı"
+string F356 = " Araştırma Ve Geliştirme Faaliyetlerinin Gelire Oranı"
+string F357 = " Aktif Karlılık %"
+string F358 = " Defter Değerine Göre Düzeltilmiş Özkaynak Karlılığı %"
+string F359 = " Özkaynak Karlılığı %"
+string F360 = " Yatırılan Sermayenin Getirisi %"
+string F361 = " Maddi Varlıkların Getirisi %"
+string F362 = " Maddi Özkaynak Getirisi %"
+string F363 = " Bir Yıllık Gelir Büyümesi"
+string F364 = " Çalışan Başına Gelir"
+string F365 = " Gelir Tahmini"
+string F366 = " Hisse Geri Alım Oranı %"
+string F367 = " Sloan Oranı %"
+string F368 = " Springate Skoru"
+string F369 = " Sürdürülebilir Büyüme Oranı"
+string F370 = " Maddi Özkaynak Oranı"
+string F371 = " Tobin's Q (approximate)"
+string F372 = " Tedavüldeki Toplam Adi Hisse Senedi"
+string F373 = " Zmijewski Skoru"
+
+string F400 = "█ HESAPLANAN VERİLER █"
+string F401 = " Toplam Piyasa Değeri"
+string F402 = " Kazanç Verimi"
+string F403 = " Piyasa Değeri / Defter Değeri"
+string F404 = " Fiyat / Kazanç Oranı"
+string F405 = " Fiyat / Satış Oranı"
+string BG   = "⛆"
+
+string POS_TT = "Grafikteki konum."
+string WTH_TT = "0-100. Yükseklik ve genişliği otomatik boyutlandırmak için 0 kullanın."
+string BG_TT  = "Bu nitelikler tüm ekran için geçerlidir. Aşağıdaki bölümde tek tek değerler için metin boyutunu ve arka plan rengini özelleştirebilirsiniz."
+string PER_TT = "Alanlar şunlardır: Değer, Dönem ve Kesinlik.\nPERIOD\n- 'Mali Çeyrek', Ödenecek Temettüler, Ödenecek Senetler, Diğer kısa vadeli borçlar, Tedavüldeki hisse senetleri, KZ endeksi, Çalışan başına net gelir, Çalışan sayısı, Çalışan başına gelir için kullanılamaz.\n- 'Son On İki Ay' dönemi yalnızca Temel EPS ve FAVÖK için kullanılabilir."
+//#endregion
+   
+
+
+//#region ———————————————————— Inputs 
+
+
+string GRP0              = "══════════    Position & Size    ══════════"
+string yPosInput         = input.string("top"    , "↕"                      , inline = "01", group = GRP0, options = ["top", "middle", "bottom"])
+string xPosInput         = input.string("right"  , "↔"                      , inline = "01", group = GRP0, options = ["left", "center", "right"], tooltip = POS_TT)
+int    rowHeightInput    = input.int(0           , "|"                      , inline = "02", group = GRP0, minval  = 0, maxval = 100)
+int    colWidthInput     = input.int(0           , "—"                      , inline = "02", group = GRP0, minval  = 0, maxval = 100, tooltip = WTH_TT)
+color  textColorInput    = input.color(LINK_WATER, "Text"                   , inline = "03", group = GRP0)
+string textSizeInput     = input.string(TS6      , ""                       , inline = "03", group = GRP0, options = [TS1, TS2, TS3, TS4, TS5, TS6])
+color  tableBgInput      = input.color(BG_COL    , BG                       , inline = "03", group = GRP0)
+color  tableBgDnInput    = input.color(BG_DN     , "🡓"                      , inline = "03", group = GRP0, tooltip = BG_TT)
+string currencyInput     = input.string(""       , "Conversion"             , inline = "04", group = GRP0, options = ["", "USD", "EUR", "CAD", "JPY", "GBP", "HKD", "CNY", "NZD", "RUB", "AUD", "CHF", "NOK", "SEK", "SGD", "TRY", "ZAR", "MYR", "KRW", "USDT", "INR"])
+bool   showCurrencyInput = input.bool(true       , "Show currencyInput"     , inline = "04", group = GRP0)
+bool   abbrValuesInput   = input.bool(true       , "Abbreviate large values",                group = GRP0)
+
+string GRP1              = "═════════════ Satır 1 ═════════════"
+string typeInput1        = input.string(F401 , "", inline = "11", group = GRP1, 
+       options           =    [F_NA, F400, F401, F402, F403, F404, F405,
+       F000, F001, F002, F003, F004, F005, F006, F007, F008, F009, F010, F011, F012, F013, F014, F015, F016, F017, F018, F019, F020, F021, F022, F023, F024, F025, F026, F027, F028, F029, F030, F031, F032, F033, F034, F035, F036, F037, F038, 
+       F100, F101, F102, F103, F104, F105, F106, F107, F108, F109, F110, F111, F112, F113, F114, F115, F116, F117, F118, F119, F120, F121, F122, F123, F124, F125, F126, F127, F128, F129, F130, F131, F132, F133, F134, F135, F136, F137, F138, F139, F140, F141, F142, F143, F144, F145, F146, F147, F148, F149, F150, F151, F152, F153, F154, F155, F156, F157, F158, F159, F160, F161, F162, F163, F164, F165, F166,
+       F200, F201, F202, F203, F204, F205, F206, F207, F208, F209, F210, F211, F212, F213, F214, F215, F216, F217, F218, F219, F220, F221, F222, F223, F224, F225, F226, F227, F228, F229, F230, F231, F232, F233, F234, F235, F236, F237, F238, F239, F240, F241, F242, F243, F244, F245,
+       F300, F301, F302, F303, F304, F305, F306, F307, F308, F309, F310, F311, F312, F313, F314, F315, F316, F317, F318, F319, F320, F321, F322, F323, F324, F325, F326, F327, F328, F329, F330, F331, F332, F333, F334, F335, F336, F337, F338, F339, F340, F341, F342, F343, F344, F345, F346, F347, F348, F349, F350, F351, F352, F353, F354, F355, F356, F357, F358, F359, F360, F361, F362, F363, F364, F365, F366, F367, F368, F369, F370, F371, F372, F373])
+string periodInput1      = input.string(FY   , "", inline = "11", group = GRP1, options = [FY, FQ, TT], tooltip = PER_TT)
+int    precInput1        = input.int(3       , "", inline = "11", group = GRP1, minval  = 0, maxval = 10)
+string legendInput1      = input.string(""   , LG, inline = "12", group = GRP1)
+string textSize1         = input.string(TS6  , "", inline = "12", group = GRP1, options = [TS1, TS2, TS3, TS4, TS5, TS6])
+color  bg1               = input.color(BG_COL, BG, inline = "12", group = GRP1)
+
+string GRP2              = "═════════════ Satır 2 ═════════════"
+string typeInput2        = input.string(F402 , ""       , inline = "21", group = GRP2, 
+       options           =    [F_NA, F400, F401, F402, F403, F404, F405,
+       F000, F001, F002, F003, F004, F005, F006, F007, F008, F009, F010, F011, F012, F013, F014, F015, F016, F017, F018, F019, F020, F021, F022, F023, F024, F025, F026, F027, F028, F029, F030, F031, F032, F033, F034, F035, F036, F037, F038, 
+       F100, F101, F102, F103, F104, F105, F106, F107, F108, F109, F110, F111, F112, F113, F114, F115, F116, F117, F118, F119, F120, F121, F122, F123, F124, F125, F126, F127, F128, F129, F130, F131, F132, F133, F134, F135, F136, F137, F138, F139, F140, F141, F142, F143, F144, F145, F146, F147, F148, F149, F150, F151, F152, F153, F154, F155, F156, F157, F158, F159, F160, F161, F162, F163, F164, F165, F166,
+       F200, F201, F202, F203, F204, F205, F206, F207, F208, F209, F210, F211, F212, F213, F214, F215, F216, F217, F218, F219, F220, F221, F222, F223, F224, F225, F226, F227, F228, F229, F230, F231, F232, F233, F234, F235, F236, F237, F238, F239, F240, F241, F242, F243, F244, F245,
+       F300, F301, F302, F303, F304, F305, F306, F307, F308, F309, F310, F311, F312, F313, F314, F315, F316, F317, F318, F319, F320, F321, F322, F323, F324, F325, F326, F327, F328, F329, F330, F331, F332, F333, F334, F335, F336, F337, F338, F339, F340, F341, F342, F343, F344, F345, F346, F347, F348, F349, F350, F351, F352, F353, F354, F355, F356, F357, F358, F359, F360, F361, F362, F363, F364, F365, F366, F367, F368, F369, F370, F371, F372, F373])
+string periodInput2      = input.string(FY   , "", inline = "21", group = GRP2, options = [FY, FQ, TT])
+int    precInput2        = input.int(2       , "", inline = "21", group = GRP2, minval  = 0, maxval = 10)
+string legendInput2      = input.string(""   , LG, inline = "22", group = GRP2)
+string textSize2         = input.string(TS6  , "", inline = "22", group = GRP2, options = [TS1, TS2, TS3, TS4, TS5, TS6])
+color  bg2               = input.color(BG_COL, BG, inline = "22", group = GRP2)
+
+string GRP3              = "═════════════ Satır 3 ═════════════"
+string typeInput3        = input.string(F403 , "", inline = "31", group = GRP3, 
+       options           =    [F_NA, F400, F401, F402, F403, F404, F405,
+       F000, F001, F002, F003, F004, F005, F006, F007, F008, F009, F010, F011, F012, F013, F014, F015, F016, F017, F018, F019, F020, F021, F022, F023, F024, F025, F026, F027, F028, F029, F030, F031, F032, F033, F034, F035, F036, F037, F038, 
+       F100, F101, F102, F103, F104, F105, F106, F107, F108, F109, F110, F111, F112, F113, F114, F115, F116, F117, F118, F119, F120, F121, F122, F123, F124, F125, F126, F127, F128, F129, F130, F131, F132, F133, F134, F135, F136, F137, F138, F139, F140, F141, F142, F143, F144, F145, F146, F147, F148, F149, F150, F151, F152, F153, F154, F155, F156, F157, F158, F159, F160, F161, F162, F163, F164, F165, F166,
+       F200, F201, F202, F203, F204, F205, F206, F207, F208, F209, F210, F211, F212, F213, F214, F215, F216, F217, F218, F219, F220, F221, F222, F223, F224, F225, F226, F227, F228, F229, F230, F231, F232, F233, F234, F235, F236, F237, F238, F239, F240, F241, F242, F243, F244, F245,
+       F300, F301, F302, F303, F304, F305, F306, F307, F308, F309, F310, F311, F312, F313, F314, F315, F316, F317, F318, F319, F320, F321, F322, F323, F324, F325, F326, F327, F328, F329, F330, F331, F332, F333, F334, F335, F336, F337, F338, F339, F340, F341, F342, F343, F344, F345, F346, F347, F348, F349, F350, F351, F352, F353, F354, F355, F356, F357, F358, F359, F360, F361, F362, F363, F364, F365, F366, F367, F368, F369, F370, F371, F372, F373])
+string periodInput3      = input.string(FY   , "", inline = "31", group = GRP3, options = [FY, FQ, TT])
+int    precInput3        = input.int(2       , "", inline = "31", group = GRP3, minval  = 0, maxval = 10)
+string legendInput3      = input.string(""   , LG, inline = "32", group = GRP3)
+string textSize3         = input.string(TS6  , "", inline = "32", group = GRP3, options = [TS1, TS2, TS3, TS4, TS5, TS6])
+color  bg3               = input.color(BG_COL, BG, inline = "32", group = GRP3)
+
+string GRP4              = "═════════════ Satır 4 ═════════════"
+string typeInput4        = input.string(F404 , "", inline = "41", group = GRP4, 
+       options           =    [F_NA, F400, F401, F402, F403, F404, F405,
+       F000, F001, F002, F003, F004, F005, F006, F007, F008, F009, F010, F011, F012, F013, F014, F015, F016, F017, F018, F019, F020, F021, F022, F023, F024, F025, F026, F027, F028, F029, F030, F031, F032, F033, F034, F035, F036, F037, F038, 
+       F100, F101, F102, F103, F104, F105, F106, F107, F108, F109, F110, F111, F112, F113, F114, F115, F116, F117, F118, F119, F120, F121, F122, F123, F124, F125, F126, F127, F128, F129, F130, F131, F132, F133, F134, F135, F136, F137, F138, F139, F140, F141, F142, F143, F144, F145, F146, F147, F148, F149, F150, F151, F152, F153, F154, F155, F156, F157, F158, F159, F160, F161, F162, F163, F164, F165, F166,
+       F200, F201, F202, F203, F204, F205, F206, F207, F208, F209, F210, F211, F212, F213, F214, F215, F216, F217, F218, F219, F220, F221, F222, F223, F224, F225, F226, F227, F228, F229, F230, F231, F232, F233, F234, F235, F236, F237, F238, F239, F240, F241, F242, F243, F244, F245,
+       F300, F301, F302, F303, F304, F305, F306, F307, F308, F309, F310, F311, F312, F313, F314, F315, F316, F317, F318, F319, F320, F321, F322, F323, F324, F325, F326, F327, F328, F329, F330, F331, F332, F333, F334, F335, F336, F337, F338, F339, F340, F341, F342, F343, F344, F345, F346, F347, F348, F349, F350, F351, F352, F353, F354, F355, F356, F357, F358, F359, F360, F361, F362, F363, F364, F365, F366, F367, F368, F369, F370, F371, F372, F373])
+string periodInput4      = input.string(FY   , "", inline = "41", group = GRP4, options = [FY, FQ, TT])
+int    precInput4        = input.int(2       , "", inline = "41", group = GRP4, minval  = 0, maxval = 10)
+string legendInput4      = input.string(""   , LG, inline = "42", group = GRP4)
+string textSize4         = input.string(TS6  , "", inline = "42", group = GRP4, options = [TS1, TS2, TS3, TS4, TS5, TS6])
+color  bg4               = input.color(BG_COL, BG, inline = "42", group = GRP4)
+
+string GRP5              = "═════════════ Satır 5 ═════════════"
+string typeInput5        = input.string(F405 , "", inline = "51", group = GRP5, 
+       options           =    [F_NA, F400, F401, F402, F403, F404, F405,
+       F000, F001, F002, F003, F004, F005, F006, F007, F008, F009, F010, F011, F012, F013, F014, F015, F016, F017, F018, F019, F020, F021, F022, F023, F024, F025, F026, F027, F028, F029, F030, F031, F032, F033, F034, F035, F036, F037, F038, 
+       F100, F101, F102, F103, F104, F105, F106, F107, F108, F109, F110, F111, F112, F113, F114, F115, F116, F117, F118, F119, F120, F121, F122, F123, F124, F125, F126, F127, F128, F129, F130, F131, F132, F133, F134, F135, F136, F137, F138, F139, F140, F141, F142, F143, F144, F145, F146, F147, F148, F149, F150, F151, F152, F153, F154, F155, F156, F157, F158, F159, F160, F161, F162, F163, F164, F165, F166,
+       F200, F201, F202, F203, F204, F205, F206, F207, F208, F209, F210, F211, F212, F213, F214, F215, F216, F217, F218, F219, F220, F221, F222, F223, F224, F225, F226, F227, F228, F229, F230, F231, F232, F233, F234, F235, F236, F237, F238, F239, F240, F241, F242, F243, F244, F245,
+       F300, F301, F302, F303, F304, F305, F306, F307, F308, F309, F310, F311, F312, F313, F314, F315, F316, F317, F318, F319, F320, F321, F322, F323, F324, F325, F326, F327, F328, F329, F330, F331, F332, F333, F334, F335, F336, F337, F338, F339, F340, F341, F342, F343, F344, F345, F346, F347, F348, F349, F350, F351, F352, F353, F354, F355, F356, F357, F358, F359, F360, F361, F362, F363, F364, F365, F366, F367, F368, F369, F370, F371, F372, F373])
+string periodInput5      = input.string(FY   , "", inline = "51", group = GRP5, options = [FY, FQ, TT])
+int    precInput5        = input.int(2       , "", inline = "51", group = GRP5, minval  = 0, maxval = 10)
+string legendInput5      = input.string(""   , LG, inline = "52", group = GRP5)
+string textSize5         = input.string(TS6  , "", inline = "52", group = GRP5, options = [TS1, TS2, TS3, TS4, TS5, TS6])
+color  bg5               = input.color(BG_COL, BG, inline = "52", group = GRP5)
+
+string GRP6              = "═════════════ Satır 6 ═════════════"
+string typeInput6        = input.string(F013 , "", inline = "61", group = GRP6, 
+       options           =    [F_NA, F400, F401, F402, F403, F404, F405,
+       F000, F001, F002, F003, F004, F005, F006, F007, F008, F009, F010, F011, F012, F013, F014, F015, F016, F017, F018, F019, F020, F021, F022, F023, F024, F025, F026, F027, F028, F029, F030, F031, F032, F033, F034, F035, F036, F037, F038, 
+       F100, F101, F102, F103, F104, F105, F106, F107, F108, F109, F110, F111, F112, F113, F114, F115, F116, F117, F118, F119, F120, F121, F122, F123, F124, F125, F126, F127, F128, F129, F130, F131, F132, F133, F134, F135, F136, F137, F138, F139, F140, F141, F142, F143, F144, F145, F146, F147, F148, F149, F150, F151, F152, F153, F154, F155, F156, F157, F158, F159, F160, F161, F162, F163, F164, F165, F166,
+       F200, F201, F202, F203, F204, F205, F206, F207, F208, F209, F210, F211, F212, F213, F214, F215, F216, F217, F218, F219, F220, F221, F222, F223, F224, F225, F226, F227, F228, F229, F230, F231, F232, F233, F234, F235, F236, F237, F238, F239, F240, F241, F242, F243, F244, F245,
+       F300, F301, F302, F303, F304, F305, F306, F307, F308, F309, F310, F311, F312, F313, F314, F315, F316, F317, F318, F319, F320, F321, F322, F323, F324, F325, F326, F327, F328, F329, F330, F331, F332, F333, F334, F335, F336, F337, F338, F339, F340, F341, F342, F343, F344, F345, F346, F347, F348, F349, F350, F351, F352, F353, F354, F355, F356, F357, F358, F359, F360, F361, F362, F363, F364, F365, F366, F367, F368, F369, F370, F371, F372, F373])
+string periodInput6      = input.string(FY   , "", inline = "61", group = GRP6, options = [FY, FQ, TT])
+int    precInput6        = input.int(3       , "", inline = "61", group = GRP6, minval  = 0, maxval = 10)
+string legendInput6      = input.string(""   , LG, inline = "62", group = GRP6)
+string textSize6         = input.string(TS6  , "", inline = "62", group = GRP6, options = [TS1, TS2, TS3, TS4, TS5, TS6])
+color  bg6               = input.color(BG_COL, BG, inline = "62", group = GRP6)
+
+string GRP7              = "═════════════ Satır 7 ═════════════" 
+string typeInput7        = input.string(F364 , "", inline = "71", group = GRP7, 
+       options           =    [F_NA, F400, F401, F402, F403, F404, F405,
+       F000, F001, F002, F003, F004, F005, F006, F007, F008, F009, F010, F011, F012, F013, F014, F015, F016, F017, F018, F019, F020, F021, F022, F023, F024, F025, F026, F027, F028, F029, F030, F031, F032, F033, F034, F035, F036, F037, F038, 
+       F100, F101, F102, F103, F104, F105, F106, F107, F108, F109, F110, F111, F112, F113, F114, F115, F116, F117, F118, F119, F120, F121, F122, F123, F124, F125, F126, F127, F128, F129, F130, F131, F132, F133, F134, F135, F136, F137, F138, F139, F140, F141, F142, F143, F144, F145, F146, F147, F148, F149, F150, F151, F152, F153, F154, F155, F156, F157, F158, F159, F160, F161, F162, F163, F164, F165, F166,
+       F200, F201, F202, F203, F204, F205, F206, F207, F208, F209, F210, F211, F212, F213, F214, F215, F216, F217, F218, F219, F220, F221, F222, F223, F224, F225, F226, F227, F228, F229, F230, F231, F232, F233, F234, F235, F236, F237, F238, F239, F240, F241, F242, F243, F244, F245,
+       F300, F301, F302, F303, F304, F305, F306, F307, F308, F309, F310, F311, F312, F313, F314, F315, F316, F317, F318, F319, F320, F321, F322, F323, F324, F325, F326, F327, F328, F329, F330, F331, F332, F333, F334, F335, F336, F337, F338, F339, F340, F341, F342, F343, F344, F345, F346, F347, F348, F349, F350, F351, F352, F353, F354, F355, F356, F357, F358, F359, F360, F361, F362, F363, F364, F365, F366, F367, F368, F369, F370, F371, F372, F373])
+string periodInput7      = input.string(FY   , "", inline = "71", group = GRP7, options = [FY, FQ, TT])
+int    precInput7        = input.int(3       , "", inline = "71", group = GRP7, minval  = 0, maxval = 10)
+string legendInput7      = input.string(""   , LG, inline = "72", group = GRP7)
+string textSize7         = input.string(TS6  , "", inline = "72", group = GRP7, options = [TS1, TS2, TS3, TS4, TS5, TS6])
+color  bg7               = input.color(BG_COL, BG, inline = "72", group = GRP7)
+
+string GRP8              = "═════════════ Satır 8 ═════════════"
+string typeInput8        = input.string(F373 , "", inline = "81", group = GRP8, 
+       options           =    [F_NA, F400, F401, F402, F403, F404, F405,
+       F000, F001, F002, F003, F004, F005, F006, F007, F008, F009, F010, F011, F012, F013, F014, F015, F016, F017, F018, F019, F020, F021, F022, F023, F024, F025, F026, F027, F028, F029, F030, F031, F032, F033, F034, F035, F036, F037, F038, 
+       F100, F101, F102, F103, F104, F105, F106, F107, F108, F109, F110, F111, F112, F113, F114, F115, F116, F117, F118, F119, F120, F121, F122, F123, F124, F125, F126, F127, F128, F129, F130, F131, F132, F133, F134, F135, F136, F137, F138, F139, F140, F141, F142, F143, F144, F145, F146, F147, F148, F149, F150, F151, F152, F153, F154, F155, F156, F157, F158, F159, F160, F161, F162, F163, F164, F165, F166,
+       F200, F201, F202, F203, F204, F205, F206, F207, F208, F209, F210, F211, F212, F213, F214, F215, F216, F217, F218, F219, F220, F221, F222, F223, F224, F225, F226, F227, F228, F229, F230, F231, F232, F233, F234, F235, F236, F237, F238, F239, F240, F241, F242, F243, F244, F245,
+       F300, F301, F302, F303, F304, F305, F306, F307, F308, F309, F310, F311, F312, F313, F314, F315, F316, F317, F318, F319, F320, F321, F322, F323, F324, F325, F326, F327, F328, F329, F330, F331, F332, F333, F334, F335, F336, F337, F338, F339, F340, F341, F342, F343, F344, F345, F346, F347, F348, F349, F350, F351, F352, F353, F354, F355, F356, F357, F358, F359, F360, F361, F362, F363, F364, F365, F366, F367, F368, F369, F370, F371, F372, F373])
+string periodInput8      = input.string(FY   , "", inline = "81", group = GRP8, options = [FY, FQ, TT])
+int    precInput8        = input.int(2       , "", inline = "81", group = GRP8, minval  = 0, maxval = 10)
+string legendInput8      = input.string(""   , LG, inline = "82", group = GRP8)
+string textSize8         = input.string(TS6  , "", inline = "82", group = GRP8, options = [TS1, TS2, TS3, TS4, TS5, TS6])
+color  bg8               = input.color(BG_COL, BG, inline = "82", group = GRP8)
+
+string GRP9              = "═════════════ Satır 9 ═════════════"
+string typeInput9        = input.string(F_NA , "", inline = "91", group = GRP9, 
+       options           =    [F_NA, F400, F401, F402, F403, F404, F405,
+       F000, F001, F002, F003, F004, F005, F006, F007, F008, F009, F010, F011, F012, F013, F014, F015, F016, F017, F018, F019, F020, F021, F022, F023, F024, F025, F026, F027, F028, F029, F030, F031, F032, F033, F034, F035, F036, F037, F038, 
+       F100, F101, F102, F103, F104, F105, F106, F107, F108, F109, F110, F111, F112, F113, F114, F115, F116, F117, F118, F119, F120, F121, F122, F123, F124, F125, F126, F127, F128, F129, F130, F131, F132, F133, F134, F135, F136, F137, F138, F139, F140, F141, F142, F143, F144, F145, F146, F147, F148, F149, F150, F151, F152, F153, F154, F155, F156, F157, F158, F159, F160, F161, F162, F163, F164, F165, F166,
+       F200, F201, F202, F203, F204, F205, F206, F207, F208, F209, F210, F211, F212, F213, F214, F215, F216, F217, F218, F219, F220, F221, F222, F223, F224, F225, F226, F227, F228, F229, F230, F231, F232, F233, F234, F235, F236, F237, F238, F239, F240, F241, F242, F243, F244, F245,
+       F300, F301, F302, F303, F304, F305, F306, F307, F308, F309, F310, F311, F312, F313, F314, F315, F316, F317, F318, F319, F320, F321, F322, F323, F324, F325, F326, F327, F328, F329, F330, F331, F332, F333, F334, F335, F336, F337, F338, F339, F340, F341, F342, F343, F344, F345, F346, F347, F348, F349, F350, F351, F352, F353, F354, F355, F356, F357, F358, F359, F360, F361, F362, F363, F364, F365, F366, F367, F368, F369, F370, F371, F372, F373])
+string periodInput9      = input.string(FY   , "", inline = "91", group = GRP9, options = [FY, FQ, TT])
+int    precInput9        = input.int(0       , "", inline = "91", group = GRP9, minval  = 0, maxval = 10)
+string legendInput9      = input.string(""   , LG, inline = "92", group = GRP9)
+string textSize9         = input.string(TS6  , "", inline = "92", group = GRP9, options = [TS1, TS2, TS3, TS4, TS5, TS6])
+color  bg9               = input.color(BG_COL, BG, inline = "92", group = GRP9)
+
+// Table used to display values.
+var table display = table.new(yPosInput + "_" + xPosInput, 2, 10, border_width = 2)
+//#endregion
+
+
+
+//#region ———————————————————— Functions 
+
+
+// @function            Converts a string from one the financial metrics to a string capapatible with the `request.financial()` function.
+// @param userFinancialChoice (simple string) A string matching one of the metrics listed in the "Financial Legends" section.    
+// @returns             (string) From the `userFinancialChoice` `options` `Fxxx` string, the `id` argument to be used with a `request.financial()` call, unless a calculated financial in the `F4xx` range was chosen.
+getId(simple string userFinancialChoice) =>
+
+    string result = switch userFinancialChoice
+        F001 => "AFTER_TAX_OTHER_INCOME" 
+        F002 => "BASIC_SHARES_OUTSTANDING" 
+        F003 => "COST_OF_GOODS_EXCL_DEP_AMORT" 
+        F004 => "COST_OF_GOODS" 
+        F005 => "DEP_AMORT_EXP_INCOME_S" 
+        F006 => "DILUTED_NET_INCOME" 
+        F007 => "DILUTED_SHARES_OUTSTANDING" 
+        F008 => "DILUTION_ADJUSTMENT" 
+        F009 => "DISCONTINUED_OPERATIONS" 
+        F010 => "EARNINGS_PER_SHARE_BASIC" 
+        F011 => "EARNINGS_PER_SHARE_DILUTED" 
+        F012 => "EBIT" 
+        F013 => "EBITDA" 
+        F014 => "EQUITY_IN_EARNINGS" 
+        F015 => "GROSS_PROFIT" 
+        F016 => "INCOME_TAX" 
+        F017 => "INTEREST_CAPITALIZED" 
+        F018 => "INTEREST_EXPENSE_ON_DEBT" 
+        F019 => "MINORITY_INTEREST_EXP" 
+        F020 => "NET_INCOME_BEF_DISC_OPER" 
+        F021 => "NET_INCOME" 
+        F022 => "NON_OPER_INCOME" 
+        F023 => "NON_OPER_INTEREST_EXP" 
+        F024 => "NON_OPER_INTEREST_INCOME" 
+        F025 => "OPER_INCOME" 
+        F026 => "OPERATING_EXPENSES" 
+        F027 => "OTHER_INCOME" 
+        F028 => "OTHER_OPER_EXPENSE_TOTAL" 
+        F029 => "PREFERRED_DIVIDENDS" 
+        F030 => "PRETAX_EQUITY_IN_EARNINGS" 
+        F031 => "PRETAX_INCOME" 
+        F032 => "RESEARCH_AND_DEV" 
+        F033 => "SELL_GEN_ADMIN_EXP_OTHER" 
+        F034 => "SELL_GEN_ADMIN_EXP_TOTAL" 
+        F035 => "TOTAL_NON_OPER_INCOME" 
+        F036 => "TOTAL_OPER_EXPENSE" 
+        F037 => "TOTAL_REVENUE" 
+        F038 => "UNUSUAL_EXPENSE_INC" 
+
+        F101 => "ACCOUNTS_PAYABLE" 
+        F102 => "ACCOUNTS_RECEIVABLES_NET" 
+        F103 => "ACCRUED_PAYROLL" 
+        F104 => "ACCUM_DEPREC_TOTAL" 
+        F105 => "ADDITIONAL_PAID_IN_CAPITAL" 
+        F106 => "BOOK_TANGIBLE_PER_SHARE" 
+        F107 => "BOOK_VALUE_PER_SHARE" 
+        F108 => "CAPITAL_LEASE_OBLIGATIONS" 
+        F109 => "CAPITAL_OPERATING_LEASE_OBLIGATIONS" 
+        F110 => "CASH_N_EQUIVALENTS" 
+        F111 => "CASH_N_SHORT_TERM_INVEST" 
+        F112 => "COMMON_EQUITY_TOTAL" 
+        F113 => "COMMON_STOCK_PAR" 
+        F114 => "CURRENT_PORT_DEBT_CAPITAL_LEASES" 
+        F115 => "DEFERRED_INCOME_CURRENT" 
+        F116 => "DEFERRED_INCOME_NON_CURRENT" 
+        F117 => "DEFERRED_TAX_ASSESTS" 
+        F118 => "DEFERRED_TAX_LIABILITIES" 
+        F119 => "DIVIDENDS_PAYABLE" 
+        F120 => "GOODWILL" 
+        F121 => "INCOME_TAX_PAYABLE" 
+        F122 => "INTANGIBLES_NET" 
+        F123 => "INVENTORY_FINISHED_GOODS" 
+        F124 => "INVENTORY_PROGRESS_PAYMENTS" 
+        F125 => "INVENTORY_RAW_MATERIALS" 
+        F126 => "INVENTORY_WORK_IN_PROGRESS" 
+        F127 => "INVESTMENTS_IN_UNCONCSOLIDATE" 
+        F128 => "LONG_TERM_DEBT_EXCL_CAPITAL_LEASE" 
+        F129 => "LONG_TERM_DEBT" 
+        F130 => "LONG_TERM_INVESTMENTS" 
+        F131 => "LONG_TERM_NOTE_RECEIVABLE" 
+        F132 => "LONG_TERM_OTHER_ASSETS_TOTAL" 
+        F133 => "MINORITY_INTEREST" 
+        F134 => "NOTES_PAYABLE_SHORT_TERM_DEBT" 
+        F135 => "OPERATING_LEASE_LIABILITIES" 
+        F136 => "OTHER_COMMON_EQUITY" 
+        F137 => "OTHER_CURRENT_ASSETS_TOTAL" 
+        F138 => "OTHER_CURRENT_LIABILITIES" 
+        F139 => "OTHER_INTANGIBLES_NET" 
+        F140 => "OTHER_INVESTMENTS" 
+        F141 => "OTHER_LIABILITIES_TOTAL" 
+        F142 => "OTHER_RECEIVABLES" 
+        F143 => "OTHER_SHORT_TERM_DEBT" 
+        F144 => "PAID_IN_CAPITAL" 
+        F145 => "PPE_TOTAL_GROSS" 
+        F146 => "PPE_TOTAL_NET" 
+        F147 => "PREFERRED_STOCK_CARRYING_VALUE" 
+        F148 => "PREPAID_EXPENSES" 
+        F149 => "PROVISION_F_RISKS" 
+        F150 => "RETAINED_EARNINGS" 
+        F151 => "SHORT_TERM_DEBT_EXCL_CURRENT_PORT" 
+        F152 => "SHORT_TERM_DEBT" 
+        F153 => "SHORT_TERM_INVEST" 
+        F154 => "SHRHLDRS_EQUITY" 
+        F155 => "TOTAL_ASSETS" 
+        F156 => "TOTAL_CURRENT_ASSETS" 
+        F157 => "TOTAL_CURRENT_LIABILITIES" 
+        F158 => "TOTAL_DEBT" 
+        F159 => "TOTAL_EQUITY" 
+        F160 => "TOTAL_INVENTORY" 
+        F161 => "TOTAL_LIABILITIES" 
+        F162 => "TOTAL_LIABILITIES_SHRHLDRS_EQUITY" 
+        F163 => "TOTAL_NON_CURRENT_ASSETS" 
+        F164 => "TOTAL_NON_CURRENT_LIABILITIES" 
+        F165 => "TOTAL_RECEIVABLES_NET" 
+        F166 => "TREASURY_STOCK_COMMON" 
+
+        F201 => "AMORTIZATION" 
+        F202 => "CAPITAL_EXPENDITURES_FIXED_ASSETS" 
+        F203 => "CAPITAL_EXPENDITURES" 
+        F204 => "CAPITAL_EXPENDITURES_OTHER_ASSETS" 
+        F205 => "CASH_F_FINANCING_ACTIVITIES" 
+        F206 => "CASH_F_INVESTING_ACTIVITIES" 
+        F207 => "CASH_F_OPERATING_ACTIVITIES" 
+        F208 => "CASH_FLOW_DEFERRED_TAXES" 
+        F209 => "CASH_FLOW_DEPRECATION_N_AMORTIZATION" 
+        F210 => "CHANGE_IN_ACCOUNTS_PAYABLE" 
+        F211 => "CHANGE_IN_ACCOUNTS_RECEIVABLE" 
+        F212 => "CHANGE_IN_ACCRUED_EXPENSES" 
+        F213 => "CHANGE_IN_INVENTORIES" 
+        F214 => "CHANGE_IN_OTHER_ASSETS" 
+        F215 => "CHANGE_IN_TAXES_PAYABLE" 
+        F216 => "CHANGES_IN_WORKING_CAPITAL" 
+        F217 => "COMMON_DIVIDENDS_CASH_FLOW" 
+        F218 => "DEPRECIATION_DEPLETION" 
+        F219 => "FREE_CASH_FLOW" 
+        F220 => "FUNDS_F_OPERATIONS" 
+        F221 => "ISSUANCE_OF_DEBT_NET" 
+        F222 => "ISSUANCE_OF_LONG_TERM_DEBT" 
+        F223 => "ISSUANCE_OF_OTHER_DEBT" 
+        F224 => "ISSUANCE_OF_SHORT_TERM_DEBT" 
+        F225 => "ISSUANCE_OF_STOCK_NET" 
+        F226 => "NET_INCOME_STARTING_LINE" 
+        F227 => "NON_CASH_ITEMS" 
+        F228 => "OTHER_FINANCING_CASH_FLOW_ITEMS_TOTAL" 
+        F229 => "OTHER_FINANCING_CASH_FLOW_SOURCES" 
+        F230 => "OTHER_FINANCING_CASH_FLOW_USES" 
+        F231 => "OTHER_INVESTING_CASH_FLOW_ITEMS_TOTAL" 
+        F232 => "OTHER_INVESTING_CASH_FLOW_SOURCES" 
+        F233 => "OTHER_INVESTING_CASH_FLOW_USES" 
+        F234 => "PREFERRED_DIVIDENDS_CASH_FLOW" 
+        F235 => "PURCHASE_OF_BUSINESS" 
+        F236 => "PURCHASE_OF_INVESTMENTS" 
+        F237 => "PURCHASE_OF_STOCK" 
+        F238 => "PURCHASE_SALE_BUSINESS" 
+        F239 => "PURCHASE_SALE_INVESTMENTS" 
+        F240 => "REDUCTION_OF_LONG_TERM_DEBT" 
+        F241 => "SALE_OF_STOCK" 
+        F242 => "SALES_OF_BUSINESS" 
+        F243 => "SALES_OF_INVESTMENTS" 
+        F244 => "SUPPLYING_OF_LONG_TERM_DEBT" 
+        F245 => "TOTAL_CASH_DIVIDENDS_PAID" 
+
+        F301 => "ACCRUALS_RATIO" 
+        F302 => "ALTMAN_Z_SCORE" 
+        F303 => "ASSET_TURNOVER" 
+        F304 => "BENEISH_M_SCORE" 
+        F305 => "BUYBACK_YIELD" 
+        F306 => "CASH_CONVERSION_CYCLE" 
+        F307 => "CASH_TO_DEBT" 
+        F308 => "COGS_TO_REVENUE" 
+        F309 => "CURRENT_RATIO" 
+        F310 => "DAY_SALES_OUT" 
+        F311 => "DAYS_INVENT" 
+        F312 => "DAYS_PAY" 
+        F313 => "DEBT_TO_ASSET" 
+        F314 => "DEBT_TO_EBITDA" 
+        F315 => "DEBT_TO_EQUITY" 
+        F316 => "DEBT_TO_REVENUE" 
+        F317 => "DIVIDEND_PAYOUT_RATIO" 
+        F318 => "DIVIDENDS_YIELD" 
+        F319 => "DPS_COMMON_STOCK_PRIM_ISSUE" 
+        F320 => "EARNINGS_ESTIMATE" 
+        F321 => "EARNINGS_PER_SHARE_BASIC_ONE_YEAR_GROWTH" 
+        F322 => "EARNINGS_PER_SHARE_DILUTED_ONE_YEAR_GROWTH" 
+        F323 => "EBITDA_MARGIN" 
+        F324 => "EFFECTIVE_INTEREST_RATE_ON_DEBT" 
+        F325 => "ENTERPRISE_VALUE_EBITDA" 
+        F326 => "ENTERPRISE_VALUE" 
+        F327 => "EQUITY_TO_ASSET" 
+        F328 => "EV_EBIT" 
+        F329 => "EV_REVENUE" 
+        F330 => "FLOAT_SHARES_OUTSTANDING" 
+        F331 => "FREE_CASH_FLOW_MARGIN" 
+        F332 => "FULMER_H_FACTOR" 
+        F333 => "GOODWILL_TO_ASSET" 
+        F334 => "GRAHAM_NUMBERS" 
+        F335 => "GROSS_MARGIN" 
+        F336 => "GROSS_PROFIT_TO_ASSET" 
+        F337 => "INTERST_COVER" 
+        F338 => "INVENT_TO_REVENUE" 
+        F339 => "INVENT_TURNOVER" 
+        F340 => "KZ_INDEX" 
+        F341 => "LONG_TERM_DEBT_TO_ASSETS" 
+        F342 => "NCAVPS_RATIO" 
+        F343 => "NET_INCOME_PER_EMPLOYEE" 
+        F344 => "NET_MARGIN" 
+        F345 => "NUMBER_OF_EMPLOYEES" 
+        F346 => "OPERATING_EARNINGS_YIELD" 
+        F347 => "OPERATING_MARGIN" 
+        F348 => "PEG_RATIO" 
+        F349 => "PIOTROSKI_F_SCORE" 
+        F350 => "PRICE_EARNINGS_FORWARD" 
+        F351 => "PRICE_SALES_FORWARD" 
+        F352 => "PRICE_TO_FREE_CASH_FLOW" 
+        F353 => "PRICE_TO_TANGIBLE_BOOK" 
+        F354 => "QUALITY_RATIO" 
+        F355 => "QUICK_RATIO" 
+        F356 => "RESEARCH_AND_DEVELOP_TO_REVENUE" 
+        F357 => "RETURN_ON_ASSETS" 
+        F358 => "RETURN_ON_EQUITY_ADJUST_TO_BOOK" 
+        F359 => "RETURN_ON_EQUITY" 
+        F360 => "RETURN_ON_INVESTED_CAPITAL" 
+        F361 => "RETURN_ON_TANG_ASSETS" 
+        F362 => "RETURN_ON_TANG_EQUITY" 
+        F363 => "REVENUE_ONE_YEAR_GROWTH" 
+        F364 => "REVENUE_PER_EMPLOYEE" 
+        F365 => "SALES_ESTIMATES" 
+        F366 => "SHARE_BUYBACK_RATIO" 
+        F367 => "SLOAN_RATIO" 
+        F368 => "SPRINGATE_SCORE" 
+        F369 => "SUSTAINABLE_GROWTH_RATE" 
+        F370 => "TANGIBLE_COMMON_EQUITY_RATIO" 
+        F371 => "TOBIN_Q_RATIO" 
+        F372 => "TOTAL_SHARES_OUTSTANDING" 
+        F373 => "ZMIJEWSKI_SCORE" 
+        =>      ""
+
+
+// @function            Checks if the user-defined metric is denoted in currency.         
+// @param userFinancialChoice (simple string) A string matching one of the metrics listed in the "Financial Legends" section. 
+// @returns             (bool) True if the `userFinancialChoice`'s units are currency.
+valueIsInCurrency(simple string userFinancialChoice) =>
+
+    bool result = switch userFinancialChoice
+        F302 => false 
+        F304 => false 
+        F305 => false 
+        F306 => false 
+        F307 => false 
+        F308 => false 
+        F309 => false 
+        F310 => false 
+        F311 => false 
+        F312 => false 
+        F313 => false 
+        F314 => false 
+        F315 => false 
+        F316 => false 
+        F317 => false 
+        F318 => false 
+        F319 => false 
+        F321 => false 
+        F322 => false 
+        F323 => false 
+        F324 => false 
+        F325 => false 
+        F327 => false 
+        F328 => false 
+        F329 => false 
+        F330 => false 
+        F331 => false 
+        F332 => false 
+        F333 => false 
+        F334 => false 
+        F335 => false 
+        F336 => false 
+        F337 => false 
+        F338 => false 
+        F339 => false 
+        F340 => false 
+        F341 => false 
+        F342 => false 
+        F344 => false 
+        F345 => false 
+        F346 => false 
+        F347 => false 
+        F348 => false 
+        F349 => false 
+        F350 => false 
+        F351 => false 
+        F352 => false 
+        F353 => false 
+        F354 => false 
+        F355 => false 
+        F356 => false 
+        F357 => false 
+        F358 => false 
+        F359 => false 
+        F360 => false 
+        F361 => false 
+        F362 => false 
+        F363 => false 
+        F366 => false 
+        F367 => false 
+        F368 => false 
+        F369 => false 
+        F370 => false 
+        F371 => false 
+        F372 => false 
+        F373 => false 
+
+        F402 => false 
+        F403 => false 
+        F404 => false 
+        F405 => false 
+        =>      true
+
+
+// @function            Formats large values.
+// @param value         (series float) Value to format.
+// @param precision     (seires string) Format suffix for precision ("" for none, ".00" for two digits, etc.).
+// @returns             (string) A formatted string of the `value` to the desired `precision` in one of the stepped unit symbols (K, M, B, T). 
+formatValue(series float value, series string precision) =>   
+    float digits = math.log10(math.abs(value))
+    string precisionFormat = "#" + precision
+    string result = switch 
+        digits > 12 => str.tostring(value / 1e12, precisionFormat + "  T")
+        digits > 9  => str.tostring(value / 1e9,  precisionFormat + "  B")
+        digits > 6  => str.tostring(value / 1e6,  precisionFormat + "  M")
+        digits > 3  => str.tostring(value / 1e3,  precisionFormat + "  K")
+        =>             str.tostring(value,  "#" + precisionFormat)
+
+
+// @function            Concatenates a result string by multiplying an input string a set number of times. 
+// @param count         (simple int) The number of iterations to add the input string to the result.          
+// @param str           (simple string) The string to be concatenated.
+// @returns             (string) A string by concatenating `count` times the `str`.
+stringOf(simple int count, simple string str) =>
+    var string msg = na
+    var int i = 0 
+    while i < count
+        msg += str
+        i += 1
+    string result = msg
+
+
+// @function            Converts a price to a user defined currency using `request.security()`. 
+// @param price         (series float) The price to convert.
+// @param currency      (simple string) The currency to convert
+// @returns             (float) Returns a value in the user-chosen currency converted from `price`. 
+convertCurrency(series float price, simple string currency) =>
+    float convertedClose = request.security(syminfo.tickerid, timeframe.period, close, currency = currency, ignore_invalid_symbol = true)
+    float ratio  = convertedClose / close
+    float result = math.round_to_mintick(price * ratio)
+
+
+// @function            Will calculate a finacial ratio if the input string matches one of the 5 metrics (MC, TSO, TR, EPS, or BVPS).
+// @param financialId   (simple string) A string matching one of the metrics listed in the "Financial Legends" section.
+// @returns             (float) A calculated financial if `financialId` corresponds to one, `na` otherwise.
+calculatedFinancial(simple string financialId) =>
+    float tso  = request.financial(syminfo.tickerid, "TOTAL_SHARES_OUTSTANDING", "FQ",  ignore_invalid_symbol = true)
+    float tr   = request.financial(syminfo.tickerid, "TOTAL_REVENUE",            "TTM", ignore_invalid_symbol = true)
+    float eps  = request.financial(syminfo.tickerid, "EARNINGS_PER_SHARE",       "TTM", ignore_invalid_symbol = true)
+    float bvps = request.financial(syminfo.tickerid, "BOOK_VALUE_PER_SHARE",     "FQ",  ignore_invalid_symbol = true)
+    float marketCap          = tso   * close
+    float earningsYield      = (eps  / close) * 100.
+    float priceBookRatio     = close / bvps
+    float priceEarningsRatio = close / eps
+    float priseSalesRatio    = marketCap / tr
+    float result = switch financialId
+        F401 => marketCap
+        F402 => earningsYield
+        F403 => priceBookRatio
+        F404 => priceEarningsRatio
+        F405 => priseSalesRatio
+        =>      na
+    result    
+
+
+// @function            Populates a row of table cells with a user-selcted financial measure. 
+// @param pos           (simple int) The position of the row in the display table.
+// @param tab           (table) The table to which the cells belong. 
+// @param desc          (simple string) The user-selected metric to display. (Must be one of the measures oulined in "Financial Legends").
+// @param period        (simple string) The time period for which the metrics pertain to ie. quaterly, yearly, etc. Options are "FQ", "FY", or "TTM".
+// @param precision     (simple int) The precision after the decimal for numbers displayed. 
+// @param legend        (simple string) An optional user-defined replacement for the financial metric displayed in the left column.
+// @param textSize      (simple string) The size of the text. 
+// @param bg            (simple color) The background color of the table cell. 
+// @returns             (void) Fetches or calculates one user-selected financial in the selected currencyInput (if one is selected), and displays it.
+printFinancial(simple int pos, table tab, simple string desc, simple string period, simple int precision, simple string legend, simple string textSize, simple color bg) =>
+    string valuePeriod        = period == FQ ? "FQ" : period == FY ? "FY" : "TTM"
+    bool   valueIsInCurrency  = valueIsInCurrency(desc)
+    string valuePrecision     = (precision == 0 ? "" : ".") + stringOf(precision, "0")
+    string builtinId          = getId(desc)
+    bool   userChoseABuiltin  = builtinId != ""
+    string valueId            = userChoseABuiltin ? builtinId : "BASIC_SHARES_OUTSTANDING"
+    string legendToPrint      = legend != "" ? " " + legend : desc
+    string sizeTxt            = textSize == TS6 ? textSizeInput : textSize
+    color  legendBg           = bg == BG_COL ? tableBgInput : bg
+    float financialCalculated = if desc == F401 or desc == F402 or desc == F403 or desc == F404 or desc == F405
+        calculatedFinancial(desc)
+    bool userMadeASelection   = userChoseABuiltin or not na(financialCalculated)
+    float financialBuiltin    = request.financial(syminfo.tickerid, valueId, valuePeriod, ignore_invalid_symbol = true)
+    float financialRaw        = nz(financialCalculated, financialBuiltin)
+    float financialConverted  = convertCurrency(financialRaw, currencyInput)
+    float financial           = valueIsInCurrency ? financialConverted : financialRaw
+    color valueBg = financial < 0 ? tableBgDnInput : legendBg
+    int row = pos - 1
+    string currency = not showCurrencyInput or not valueIsInCurrency ? "" : currencyInput == "" ? syminfo.currency : currencyInput
+    string str = na(financial) ? "" : " " + (abbrValuesInput ? formatValue(financial, valuePrecision) : str.tostring(financial, "###,###,###,###,###,###" + valuePrecision)) + " " + currency
+    if userMadeASelection and barstate.islastconfirmedhistory
+        table.cell(tab, 0, row, legendToPrint, colWidthInput, rowHeightInput, textColorInput, text.align_left, text.align_center, sizeTxt, legendBg)
+        table.cell(tab, 1, row, str,           colWidthInput, rowHeightInput, textColorInput, text.align_left, text.align_center, sizeTxt, valueBg)
+    if userMadeASelection and barstate.islast
+        table.cell_set_text(tab, 1, row, str)
+//#endregion
+
+
+
+//#region ———————————————————— Display 
+
+
+printFinancial(1, display, typeInput1, periodInput1, precInput1, legendInput1, textSize1, bg1)
+printFinancial(2, display, typeInput2, periodInput2, precInput2, legendInput2, textSize2, bg2)
+printFinancial(3, display, typeInput3, periodInput3, precInput3, legendInput3, textSize3, bg3)
+printFinancial(4, display, typeInput4, periodInput4, precInput4, legendInput4, textSize4, bg4)
+printFinancial(5, display, typeInput5, periodInput5, precInput5, legendInput5, textSize5, bg5)
+printFinancial(6, display, typeInput6, periodInput6, precInput6, legendInput6, textSize6, bg6)
+printFinancial(7, display, typeInput7, periodInput7, precInput7, legendInput7, textSize7, bg7)
+printFinancial(8, display, typeInput8, periodInput8, precInput8, legendInput8, textSize8, bg8)
+printFinancial(9, display, typeInput9, periodInput9, precInput9, legendInput9, textSize9, bg9)
+bgcolor(color.new(tableBgInput, 100))
+//#endregion
