@@ -1,4 +1,4 @@
-string F100 = "█ BALANCE SHEET █"
+string F100 = "█ BİLANÇO █"
 string F101 = " Borçlu Hesaplar"
 string F102 = " Alınacak Hesaplar - Trade, Net"
 string F103 = " Tahakkuk Etmiş Ücretler"
