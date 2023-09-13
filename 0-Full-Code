@@ -29,9 +29,9 @@ string TS6  = "auto"
 string LG   = " Legend"
 
 // Financial periods.
-string FQ   = "Financial Quarter"
-string FY   = "Financial Year"
-string TT   = "Trailing Twelve Months"
+string FQ   = "Finansal Çeyrek"
+string FY   = "Finansal Yıl"
+string TT   = "Takip Eden On İki Ay"
 
 // Financial legends.
 string F_NA = "⸺"
@@ -285,17 +285,17 @@ string PER_TT = "Alanlar şunlardır: Değer, Dönem ve Kesinlik.\nPERIOD\n- 'Ma
 
 
 string GRP0              = "══════════    Position & Size    ══════════"
-string yPosInput         = input.string("top"    , "↕"                      , inline = "01", group = GRP0, options = ["top", "middle", "bottom"])
-string xPosInput         = input.string("right"  , "↔"                      , inline = "01", group = GRP0, options = ["left", "center", "right"], tooltip = POS_TT)
-int    rowHeightInput    = input.int(0           , "|"                      , inline = "02", group = GRP0, minval  = 0, maxval = 100)
-int    colWidthInput     = input.int(0           , "—"                      , inline = "02", group = GRP0, minval  = 0, maxval = 100, tooltip = WTH_TT)
-color  textColorInput    = input.color(LINK_WATER, "Text"                   , inline = "03", group = GRP0)
-string textSizeInput     = input.string(TS6      , ""                       , inline = "03", group = GRP0, options = [TS1, TS2, TS3, TS4, TS5, TS6])
-color  tableBgInput      = input.color(BG_COL    , BG                       , inline = "03", group = GRP0)
-color  tableBgDnInput    = input.color(BG_DN     , "🡓"                      , inline = "03", group = GRP0, tooltip = BG_TT)
-string currencyInput     = input.string(""       , "Conversion"             , inline = "04", group = GRP0, options = ["", "USD", "EUR", "CAD", "JPY", "GBP", "HKD", "CNY", "NZD", "RUB", "AUD", "CHF", "NOK", "SEK", "SGD", "TRY", "ZAR", "MYR", "KRW", "USDT", "INR"])
-bool   showCurrencyInput = input.bool(true       , "Show currencyInput"     , inline = "04", group = GRP0)
-bool   abbrValuesInput   = input.bool(true       , "Abbreviate large values",                group = GRP0)
+string yPosInput         = input.string("top"    , "↕"                       , inline = "01", group = GRP0, options = ["top", "middle", "bottom"])
+string xPosInput         = input.string("right"  , "↔"                       , inline = "01", group = GRP0, options = ["left", "center", "right"], tooltip = POS_TT)
+int    rowHeightInput    = input.int(0           , "|"                       , inline = "02", group = GRP0, minval  = 0, maxval = 100)
+int    colWidthInput     = input.int(0           , "—"                       , inline = "02", group = GRP0, minval  = 0, maxval = 100, tooltip = WTH_TT)
+color  textColorInput    = input.color(LINK_WATER, "Yazı"                    , inline = "03", group = GRP0)
+string textSizeInput     = input.string(TS6      , ""                        , inline = "03", group = GRP0, options = [TS1, TS2, TS3, TS4, TS5, TS6])
+color  tableBgInput      = input.color(BG_COL    , BG                        , inline = "03", group = GRP0)
+color  tableBgDnInput    = input.color(BG_DN     , "🡓"                       , inline = "03", group = GRP0, tooltip = BG_TT)
+string currencyInput     = input.string(""       , "Dönüştürün"              , inline = "04", group = GRP0, options = ["", "USD", "EUR", "CAD", "JPY", "GBP", "HKD", "CNY", "NZD", "RUB", "AUD", "CHF", "NOK", "SEK", "SGD", "TRY", "ZAR", "MYR", "KRW", "USDT", "INR"])
+bool   showCurrencyInput = input.bool(true       , "Para Birimini Göster"    , inline = "04", group = GRP0)
+bool   abbrValuesInput   = input.bool(true       , "Büyük Değerleri Kısaltın", group = GRP0)
 
 string GRP1              = "═════════════ Satır 1 ═════════════"
 string typeInput1        = input.string(F401 , "", inline = "11", group = GRP1, 
@@ -851,4 +851,5 @@ printFinancial(7, display, typeInput7, periodInput7, precInput7, legendInput7, t
 printFinancial(8, display, typeInput8, periodInput8, precInput8, legendInput8, textSize8, bg8)
 printFinancial(9, display, typeInput9, periodInput9, precInput9, legendInput9, textSize9, bg9)
 bgcolor(color.new(tableBgInput, 100))
+
 //#endregion
