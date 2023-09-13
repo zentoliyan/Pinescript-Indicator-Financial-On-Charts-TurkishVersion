@@ -1,7 +1,6 @@
-string F400 = "█ CALCULATED █"
+string F400 = "█ HESAPLANAN VERİLER █"
 string F401 = " Toplam Piyasa Değeri"
 string F402 = " Kazanç Verimi"
 string F403 = " Piyasa Değeri / Defter Değeri"
 string F404 = " Fiyat / Kazanç Oranı"
 string F405 = " Fiyat / Satış Oranı"
-string BG   = "⛆"
