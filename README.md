@@ -3,9 +3,9 @@ Bu gösterge, finansal grafiklerde kullanılan bir araçtır ve kullanıcılara 
 -------------------------- İngilizce Temel Analiz Terimlerinin Türkçe Karşılıkları --------------------------
 
 █ GELİR TABLOLARI █
-Vergi sonrası diğer gelir/gider
-Ortalama Temel Hisse Senedi Sayısı
-Diğer Mal ve Hizmet Satış Maliyeti
+ Vergi sonrası diğer gelir/gider
+ Ortalama Temel Hisse Senedi Sayısı
+ Diğer Mal ve Hizmet Satış Maliyeti
 Mal ve Hizmet Satış Maliyeti
 Amortismanlar
 Diluted net income available to common stockholders
