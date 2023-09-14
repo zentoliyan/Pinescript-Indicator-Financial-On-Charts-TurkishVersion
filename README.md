@@ -2,8 +2,8 @@ Bu gösterge, finansal grafiklerde kullanılan bir araçtır ve kullanıcılara 
 
 ----------------------------- İngilizce Temel Analiz Terimlerinin Türkçe Karşılıkları -----------------------------
 
- F000 = █ GELİR TABLOLARI █
- F001 =  Vergi sonrası diğer gelir/gider
+ F000 = █ GELİR TABLOLARI █\n
+ F001 =  Vergi sonrası diğer gelir/gider\n
  F002 =  Ortalama Temel Hisse Senedi Sayısı
  F003 =  Diğer Mal ve Hizmet Satış Maliyeti
  F004 =  Mal ve Hizmet Satış Maliyeti
