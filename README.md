@@ -12,6 +12,7 @@ Diluted net income available to common stockholders
 Seyreltilmiş Hisse Senedi Sayısı
 Seyrelme Düzeltmesi
 Durdurulan Faaliyetler
+
 Hisse Başına Kazanç - Basit
 Hisse Başına Kazanç - Seyreltmiş
 FVÖK
